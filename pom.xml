@@ -24,6 +24,17 @@
             <artifactId>jetty-servlet</artifactId>
             <version>9.4.21.v20190926</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.15.4</version>
+        </dependency>
     </dependencies>
 
     <build>
