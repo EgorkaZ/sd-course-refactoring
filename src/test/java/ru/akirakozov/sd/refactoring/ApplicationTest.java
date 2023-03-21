@@ -1,4 +1,4 @@
-package ru.akirakozov.sd.refactoring.servlet;
+package ru.akirakozov.sd.refactoring;
 
 import java.io.IOException;
 import java.net.URI;
@@ -31,7 +31,7 @@ import org.junit.Test;
 import ru.akirakozov.sd.refactoring.Main;
 import ru.akirakozov.sd.refactoring.products.Product;
 
-public class ServletTest {
+public class ApplicationTest {
     // public class Product implements Comparable<Product> {
     // public Product(String name, int price) {
     // this.name = name;
@@ -130,12 +130,11 @@ public class ServletTest {
         return Comparator.comparingInt(Product::getPrice).thenComparing(Product::getName);
     }
 
-    private Set<Product> getProducts() throws IOException, InterruptedException {
+    private List<Product> getProducts() throws IOException, InterruptedException {
         return makeRequest("/get-products")
                 .stream()
                 .map(line -> parseProduct(line))
-                .collect(Collectors.toCollection(
-                        () -> new TreeSet<Product>(getProductComparator())));
+                .collect(Collectors.toList());
     }
 
     private int makeNumberQuery(String query) throws IOException, InterruptedException {
@@ -156,15 +155,15 @@ public class ServletTest {
         return Optional.of(parseProduct(response.get(0)));
     }
 
-    private void runTestWith(List<Product> products) throws IOException, InterruptedException {
-        TreeSet<Product> asSet = new TreeSet<Product>(getProductComparator());
-        for (Product product : products) {
-            asSet.add(product);
-        }
-        runTestWith(asSet);
-    }
+    // private void runTestWith(List<Product> products) throws IOException, InterruptedException {
+    //     TreeSet<Product> asSet = new TreeSet<Product>(getProductComparator());
+    //     for (Product product : products) {
+    //         asSet.add(product);
+    //     }
+    //     runTestWith(asSet);
+    // }
 
-    private void runTestWith(TreeSet<Product> products) throws IOException, InterruptedException {
+    private void runTestWith(List<Product> products) throws IOException, InterruptedException {
         int sum = 0;
         for (Product product : products) {
             addProduct(product);
@@ -181,8 +180,8 @@ public class ServletTest {
             Assert.assertTrue("found minimum in empty storage", minPrice.isEmpty());
             Assert.assertTrue("found minimum in empty storage", maxPrice.isEmpty());
         } else {
-            Assert.assertEquals(products.first(), minPrice.get());
-            Assert.assertEquals(products.last(), maxPrice.get());
+            Assert.assertEquals(Collections.min(products, getProductComparator()), minPrice.get());
+            Assert.assertEquals(Collections.max(products, getProductComparator()), maxPrice.get());
         }
 
         Assert.assertEquals(makeRequest("/query").get(0), "Unknown command: null");
@@ -224,7 +223,7 @@ public class ServletTest {
     public void addCheckMultipleDuplicated() throws IOException, InterruptedException {
         runTestWith(List.of(
                 new Product("ab", 12),
-                new Product("ab", 10),
+                new Product("ab", 12),
                 new Product("cd", 23),
                 new Product("ef", 34),
                 new Product("ef", 35),
