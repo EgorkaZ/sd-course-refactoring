@@ -9,10 +9,6 @@ import ru.akirakozov.sd.refactoring.servlet.QueryServlet;
 import ru.akirakozov.sd.refactoring.storage.ProductStorage;
 import ru.akirakozov.sd.refactoring.storage.SqliteProductStorage;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
-
 /**
  * @author akirakozov
  */

@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import ru.akirakozov.sd.refactoring.products.Product;
 
@@ -71,7 +70,6 @@ public class SqliteProductStorage implements ProductStorage {
     public void addProduct(Product product) {
         String request = String.format("INSERT INTO PRODUCT (NAME, PRICE) VALUES (\"%s\", %d)",
                 product.getName(), product.getPrice());
-        System.out.println("Adding with: " + request);
         makeDbUpdate(request);
     }
 
