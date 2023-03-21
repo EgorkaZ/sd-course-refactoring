@@ -18,7 +18,12 @@ import java.sql.Statement;
  */
 public class Main {
     public static void main(String[] args) throws Exception {
-        ProductStorage storage = new SqliteProductStorage("jdbc:sqlite:test.db");
+        String connectionUrl = "jdbc:sqlite:test.db";
+        if (args.length > 0) {
+            connectionUrl = String.format("jdbc:sqlite:%s", args[0]);
+            System.out.println("Making DB in " + connectionUrl);
+        }
+        ProductStorage storage = new SqliteProductStorage(connectionUrl);
         storage.initializeStorage();
 
         Server server = new Server(8081);

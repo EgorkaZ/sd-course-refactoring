@@ -5,6 +5,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -39,7 +41,8 @@ public class ApplicationTest {
     public static void setUpAll() throws InterruptedException {
         mainExecutor.submit(() -> {
             try {
-                Main.main(new String[] {});
+                Files.createDirectories(Path.of("tmp"));
+                Main.main(new String[] {"tmp/test.db"});
             } catch (Exception exc) {
                 exc.printStackTrace();
             }
@@ -48,13 +51,15 @@ public class ApplicationTest {
     }
 
     @AfterClass
-    public static void tearDownAll() {
+    public static void tearDownAll() throws IOException {
         mainExecutor.shutdown();
+        Files.deleteIfExists(Path.of("tmp/test.db"));
+        Files.deleteIfExists(Path.of("tmp"));
     }
 
     @After
     public void tearDown() {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:tmp/test.db")) {
             Statement stmt = connection.createStatement();
 
             System.out.println("Deleting elements");
