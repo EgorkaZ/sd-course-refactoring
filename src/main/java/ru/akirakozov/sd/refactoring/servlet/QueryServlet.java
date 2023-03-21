@@ -3,6 +3,10 @@ package ru.akirakozov.sd.refactoring.servlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import ru.akirakozov.sd.refactoring.products.Product;
+import ru.akirakozov.sd.refactoring.storage.ProductStorage;
+
 import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.sql.Connection;
@@ -16,19 +20,13 @@ import java.util.Map;
 /**
  * @author akirakozov
  */
-public class QueryServlet extends HttpServlet {
+public class QueryServlet extends ProductServlet {
+    public QueryServlet(ProductStorage storage) {
+        super(storage);
+    }
+
     private enum Command {
-        MIN, MAX, SUM, COUNT, UNKNOWN(null);
-
-        Command() {
-            this.unparsedCommand = null;
-        }
-
-        Command(String unparsedCommand) {
-            this.unparsedCommand = unparsedCommand;
-        }
-
-        private final String unparsedCommand;
+        MIN, MAX, SUM, COUNT, UNKNOWN;
 
         public static Command getFromRequest(String command) {
             if (command == null) {
@@ -44,19 +42,22 @@ public class QueryServlet extends HttpServlet {
         }
     }
 
-    private static EnumMap<Command, String> cmdToSql = new EnumMap<Command, String>(Map.of(
-        Command.MAX, "SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1",
-        Command.MIN, "SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1",
-        Command.SUM, "SELECT SUM(price) FROM PRODUCT",
-        Command.COUNT, "SELECT COUNT(*) FROM PRODUCT"
-    ));
-
     private static final EnumMap<Command, String> cmdToHeader = new EnumMap<Command, String>(Map.of(
         Command.MAX, "<h1>Product with max price: </h1>",
         Command.MIN, "<h1>Product with min price: </h1>",
         Command.SUM, "Summary price: ",
         Command.COUNT, "Number of products: "
     ));
+
+    private static void printResult(HttpServletResponse response, Product product) throws IOException {
+        if (product != null) {
+            response.getWriter().printf("%s\t%d</br>\n", product.getName(), product.getPrice());
+        }
+    }
+
+    private static void printResult(HttpServletResponse response, int result) throws IOException {
+        response.getWriter().println(result);
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -69,41 +70,27 @@ public class QueryServlet extends HttpServlet {
             return;
         }
 
-        try {
-            try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-                Statement stmt = c.createStatement();
-                ResultSet rs = stmt.executeQuery(cmdToSql.get(cmd));
+        response.getWriter().println("<html><body>");
+        response.getWriter().println(cmdToHeader.get(cmd));
 
-                response.getWriter().println("<html><body>");
-                response.getWriter().println(cmdToHeader.get(cmd));
-
-                switch (cmd) {
-                    case MIN:
-                    case MAX: {
-                        while (rs.next()) {
-                            String name = rs.getString("name");
-                            int price = rs.getInt("price");
-                            response.getWriter().printf("%s\t%s</br>\n", name, price);
-                        }
-                        break;
-                    }
-                    case SUM:
-                    case COUNT: {
-                        if (rs.next()) {
-                            int price = rs.getInt(1);
-                            response.getWriter().println(price);
-                        }
-                        break;
-                    }
-                    default: throw new IllegalArgumentException(cmd.name());
-                }
-                response.getWriter().println("</body></html>");
-
-                rs.close();
-                stmt.close();
+        switch (cmd) {
+            case MIN: {
+                printResult(response, storage.getMinPrice());
+                break;
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            case MAX: {
+                printResult(response, storage.getMaxPrice());
+                break;
+            }
+            case SUM: {
+                printResult(response, storage.getPriceSum());
+                break;
+            }
+            case COUNT: {
+                printResult(response, storage.getProductCount());
+                break;
+            }
+            default: throw new IllegalArgumentException(cmd.name());
         }
 
         finishResponse(response);
