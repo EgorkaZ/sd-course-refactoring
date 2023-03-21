@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import ru.akirakozov.sd.refactoring.products.Product;
 import ru.akirakozov.sd.refactoring.storage.ProductStorage;
+import ru.akirakozov.sd.refactoring.view.HtmlResponseView;
+import ru.akirakozov.sd.refactoring.view.ResponseView;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -28,8 +30,9 @@ public class AddProductServlet extends ProductServlet {
 
         storage.addProduct(new Product(name, price));
 
-        response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().println("OK");
+        ResponseView responseView = new HtmlResponseView(response);
+        responseView.beginResponse();
+        responseView.print("OK");
+        responseView.finishResponse();
     }
 }

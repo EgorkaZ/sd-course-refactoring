@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletResponse;
 import ru.akirakozov.sd.refactoring.products.Product;
 import ru.akirakozov.sd.refactoring.storage.ProductStorage;
 import ru.akirakozov.sd.refactoring.storage.SqliteProductStorage;
+import ru.akirakozov.sd.refactoring.view.HtmlResponseView;
+import ru.akirakozov.sd.refactoring.view.ResponseView;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -26,13 +28,14 @@ public class GetProductsServlet extends ProductServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final List<Product> products = storage.getAllProducts();
-        response.getWriter().println("<html><body>");
+
+        ResponseView responseView = new HtmlResponseView(response);
+        responseView.beginResponse();
 
         for (Product product : products) {
-            response.getWriter().printf("%s\t%d</br>\n", product.getName(), product.getPrice());
+            responseView.print(product);
         }
 
-        response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
+        responseView.finishResponse();
     }
 }
