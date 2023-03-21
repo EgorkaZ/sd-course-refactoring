@@ -32,35 +32,6 @@ import ru.akirakozov.sd.refactoring.Main;
 import ru.akirakozov.sd.refactoring.products.Product;
 
 public class ApplicationTest {
-    // public class Product implements Comparable<Product> {
-    // public Product(String name, int price) {
-    // this.name = name;
-    // this.price = price;
-    // }
-
-    // @Override
-    // public String toString() {
-    // return String.format("Product(name=%s, price=%d)", this.name, this.price);
-    // }
-
-    // @Override
-    // public boolean equals(Object other) {
-    // if (other instanceof Product) {
-    // Product asProduct = (Product) other;
-    // return name.equals(asProduct.name) && price == asProduct.price;
-    // }
-    // return false;
-    // }
-
-    // @Override
-    // public int compareTo(Product other) {
-    // return Comparator.comparingInt((Product prod) -> prod.price)
-    // .thenComparing(prod -> prod.name)
-    // .compare(this, other);
-    // }
-
-    // }
-
     private static final ExecutorService mainExecutor = Executors.newSingleThreadExecutor();
     private final HttpClient client = HttpClient.newHttpClient();
 
@@ -154,14 +125,6 @@ public class ApplicationTest {
         }
         return Optional.of(parseProduct(response.get(0)));
     }
-
-    // private void runTestWith(List<Product> products) throws IOException, InterruptedException {
-    //     TreeSet<Product> asSet = new TreeSet<Product>(getProductComparator());
-    //     for (Product product : products) {
-    //         asSet.add(product);
-    //     }
-    //     runTestWith(asSet);
-    // }
 
     private void runTestWith(List<Product> products) throws IOException, InterruptedException {
         int sum = 0;
