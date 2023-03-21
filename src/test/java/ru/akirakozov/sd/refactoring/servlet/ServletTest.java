@@ -172,6 +172,9 @@ public class ServletTest {
             Assert.assertEquals(products.first(), minPrice.get());
             Assert.assertEquals(products.last(), maxPrice.get());
         }
+
+        Assert.assertEquals(makeRequest("/query").get(0), "Unknown command: null");
+        Assert.assertEquals(makeRequest("/query?command=kek").get(0), "Unknown command: kek");
     }
 
     @Test
