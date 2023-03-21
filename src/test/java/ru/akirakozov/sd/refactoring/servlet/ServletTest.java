@@ -29,38 +29,37 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.akirakozov.sd.refactoring.Main;
+import ru.akirakozov.sd.refactoring.products.Product;
 
 public class ServletTest {
-    public class Product implements Comparable<Product> {
-        public Product(String name, int price) {
-            this.name = name;
-            this.price = price;
-        }
+    // public class Product implements Comparable<Product> {
+    // public Product(String name, int price) {
+    // this.name = name;
+    // this.price = price;
+    // }
 
-        @Override
-        public String toString() {
-            return String.format("Product(name=%s, price=%d)", this.name, this.price);
-        }
+    // @Override
+    // public String toString() {
+    // return String.format("Product(name=%s, price=%d)", this.name, this.price);
+    // }
 
-        @Override
-        public boolean equals(Object other) {
-            if (other instanceof Product) {
-                Product asProduct = (Product) other;
-                return name.equals(asProduct.name) && price == asProduct.price;
-            }
-            return false;
-        }
+    // @Override
+    // public boolean equals(Object other) {
+    // if (other instanceof Product) {
+    // Product asProduct = (Product) other;
+    // return name.equals(asProduct.name) && price == asProduct.price;
+    // }
+    // return false;
+    // }
 
-        @Override
-        public int compareTo(Product other) {
-            return Comparator.comparingInt((Product prod) -> prod.price)
-                .thenComparing(prod -> prod.name)
-                .compare(this, other);
-        }
+    // @Override
+    // public int compareTo(Product other) {
+    // return Comparator.comparingInt((Product prod) -> prod.price)
+    // .thenComparing(prod -> prod.name)
+    // .compare(this, other);
+    // }
 
-        String name;
-        int price;
-    }
+    // }
 
     private static final ExecutorService mainExecutor = Executors.newSingleThreadExecutor();
     private final HttpClient client = HttpClient.newHttpClient();
@@ -109,7 +108,7 @@ public class ServletTest {
     }
 
     private void addProduct(Product product) throws IOException, InterruptedException {
-        makeRequest(String.format("/add-product?name=%s&price=%d", product.name, product.price));
+        makeRequest(String.format("/add-product?name=%s&price=%d", product.getName(), product.getPrice()));
     }
 
     private int parsePrice(String priceStr) {
@@ -127,11 +126,16 @@ public class ServletTest {
         return new Product(name, price);
     }
 
+    private static Comparator<Product> getProductComparator() {
+        return Comparator.comparingInt(Product::getPrice).thenComparing(Product::getName);
+    }
+
     private Set<Product> getProducts() throws IOException, InterruptedException {
         return makeRequest("/get-products")
                 .stream()
                 .map(line -> parseProduct(line))
-                .collect(Collectors.toCollection(TreeSet::new));
+                .collect(Collectors.toCollection(
+                        () -> new TreeSet<Product>(getProductComparator())));
     }
 
     private int makeNumberQuery(String query) throws IOException, InterruptedException {
@@ -152,11 +156,19 @@ public class ServletTest {
         return Optional.of(parseProduct(response.get(0)));
     }
 
+    private void runTestWith(List<Product> products) throws IOException, InterruptedException {
+        TreeSet<Product> asSet = new TreeSet<Product>(getProductComparator());
+        for (Product product : products) {
+            asSet.add(product);
+        }
+        runTestWith(asSet);
+    }
+
     private void runTestWith(TreeSet<Product> products) throws IOException, InterruptedException {
         int sum = 0;
         for (Product product : products) {
             addProduct(product);
-            sum += product.price;
+            sum += product.getPrice();
         }
 
         Assert.assertEquals(products, getProducts());
@@ -183,44 +195,41 @@ public class ServletTest {
 
     @Test
     public void getEmptyList() throws IOException, InterruptedException {
-        runTestWith(new TreeSet<Product>());
+        runTestWith(List.of());
     }
 
     @Test
     public void addCheckSingle() throws IOException, InterruptedException {
-        runTestWith(new TreeSet<Product>(List.of(new Product("ab", 10))));
+        runTestWith(List.of(new Product("ab", 10)));
     }
 
     @Test
     public void addCheckMultiple() throws IOException, InterruptedException {
-        runTestWith(new TreeSet<Product>(List.of(
-            new Product("ab", 12),
-            new Product("cd", 23),
-            new Product("ef", 34),
-            new Product("gh", 45)
-        )));
+        runTestWith(List.of(
+                new Product("ab", 12),
+                new Product("cd", 23),
+                new Product("ef", 34),
+                new Product("gh", 45)));
     }
 
     @Test
     public void addCheckSingleDuplicated() throws IOException, InterruptedException {
-        runTestWith(new TreeSet<Product>(List.of(
-            new Product("ab", 12),
-            new Product("ab", 12),
-            new Product("ab", 12)
-        )));
+        runTestWith(List.of(
+                new Product("ab", 12),
+                new Product("ab", 12),
+                new Product("ab", 12)));
     }
 
     @Test
     public void addCheckMultipleDuplicated() throws IOException, InterruptedException {
-        runTestWith(new TreeSet<Product>(List.of(
-            new Product("ab", 12),
-            new Product("ab", 10),
-            new Product("cd", 23),
-            new Product("ef", 34),
-            new Product("ef", 35),
-            new Product("ef", 36),
-            new Product("gh", 45),
-            new Product("gh", 46)
-        )));
+        runTestWith(List.of(
+                new Product("ab", 12),
+                new Product("ab", 10),
+                new Product("cd", 23),
+                new Product("ef", 34),
+                new Product("ef", 35),
+                new Product("ef", 36),
+                new Product("gh", 45),
+                new Product("gh", 46)));
     }
 }
