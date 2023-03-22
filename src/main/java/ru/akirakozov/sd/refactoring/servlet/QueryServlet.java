@@ -3,6 +3,7 @@ package ru.akirakozov.sd.refactoring.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ru.akirakozov.sd.refactoring.aspect.Profile;
 import ru.akirakozov.sd.refactoring.products.Product;
 import ru.akirakozov.sd.refactoring.storage.ProductStorage;
 import ru.akirakozov.sd.refactoring.view.HtmlResponseView;
@@ -68,6 +69,7 @@ public class QueryServlet extends ProductServlet {
     }
 
     @Override
+    @Profile
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String commandStr = request.getParameter("command");
 

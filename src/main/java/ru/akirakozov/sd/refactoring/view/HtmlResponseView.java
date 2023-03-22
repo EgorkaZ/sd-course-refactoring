@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
 
+import ru.akirakozov.sd.refactoring.aspect.Profile;
 import ru.akirakozov.sd.refactoring.products.Product;
 
 public class HtmlResponseView implements ResponseView {
@@ -14,11 +15,13 @@ public class HtmlResponseView implements ResponseView {
     }
 
     @Override
+    @Profile
     public void print(Product product) throws IOException {
         response.getWriter().printf("%s\t%d</br>\n", product.getName(), product.getPrice());
     }
 
     @Override
+    @Profile
     public void print(int number) throws IOException {
         response.getWriter().println(number);
     }

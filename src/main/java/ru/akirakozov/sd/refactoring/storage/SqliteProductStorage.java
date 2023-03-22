@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.akirakozov.sd.refactoring.aspect.Profile;
 import ru.akirakozov.sd.refactoring.products.Product;
 
 public class SqliteProductStorage implements ProductStorage {
@@ -19,11 +20,13 @@ public class SqliteProductStorage implements ProductStorage {
     }
 
     @Override
+    @Profile
     public int getPriceSum() {
         return getStatistic("SELECT SUM(price) FROM PRODUCT");
     }
 
     @Override
+    @Profile
     public int getProductCount() {
         return getStatistic("SELECT COUNT(*) FROM PRODUCT");
     }
@@ -35,18 +38,21 @@ public class SqliteProductStorage implements ProductStorage {
     }
 
     @Override
+    @Profile
     public Product getMinPrice() {
         String request = "SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1";
         return requestSingleProduct(request);
     }
 
     @Override
+    @Profile
     public Product getMaxPrice() {
         String request = "SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1";
         return requestSingleProduct(request);
     }
 
     @Override
+    @Profile
     public List<Product> getAllProducts() {
         String request = "SELECT * FROM PRODUCT";
         return requestProductList(request);
@@ -67,6 +73,7 @@ public class SqliteProductStorage implements ProductStorage {
     }
 
     @Override
+    @Profile
     public void addProduct(Product product) {
         String request = String.format("INSERT INTO PRODUCT (NAME, PRICE) VALUES (\"%s\", %d)",
                 product.getName(), product.getPrice());
@@ -74,6 +81,7 @@ public class SqliteProductStorage implements ProductStorage {
     }
 
     @Override
+    @Profile
     public void initializeStorage() {
         String request = "CREATE TABLE IF NOT EXISTS PRODUCT" +
                 "(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
@@ -96,7 +104,7 @@ public class SqliteProductStorage implements ProductStorage {
                 int price = rs.getInt("price");
                 Product product = new Product(name, price);
 
-                products.add(new Product(name, price));
+                products.add(product);
             }
         }
     }
@@ -112,6 +120,7 @@ public class SqliteProductStorage implements ProductStorage {
         }
     }
 
+    @Profile
     private void makeDbQuery(String command, ResultAggregator aggregator) {
         try (Connection c = DriverManager.getConnection(connectionUrl)) {
             Statement stmt = c.createStatement();
@@ -126,6 +135,7 @@ public class SqliteProductStorage implements ProductStorage {
         }
     }
 
+    @Profile
     private void makeDbUpdate(String command) {
         try (Connection c = DriverManager.getConnection(connectionUrl)) {
             Statement stmt = c.createStatement();
